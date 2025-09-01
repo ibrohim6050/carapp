@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { BidsService } from './bids.service';
 import { BidsController } from './bids.controller';
-import { PrismaService } from '../prisma.service';
-import { LoadsService } from '../loads/loads.service';
-
-@Module({ controllers: [BidsController], providers: [BidsService, PrismaService, LoadsService] })
+@Module({ providers: [PrismaService, BidsService], controllers: [BidsController] })
 export class BidsModule {}

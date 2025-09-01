@@ -1,31 +1,32 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
-
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 enum Role { customer carrier admin }
 enum LoadStatus { draft open closed awarded cancelled }
-
 model User {
-  id         String   @id @default(cuid())
-  email      String   @unique
-  passwordHash String?
-  role       Role
-  companyId  String?
-  company    Company? @relation(fields: [companyId], references: [id])
-  createdAt  DateTime @default(now())
-  loads      Load[]   @relation("CustomerLoads")
-  bids       Bid[]
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String?
+  role          Role
+  companyId     String?
+  company       Company?  @relation(fields: [companyId], references: [id])
+  createdAt     DateTime  @default(now())
+  loads         Load[]    @relation("CustomerLoads")
+  bids          Bid[]
 }
-
 model Company {
-  id          String  @id @default(cuid())
-  name        String
-  tin         String?
-  verifiedAt  DateTime?
-  ownerUserId String?
-  users       User[]
-  bids        Bid[]
+  id           String   @id @default(cuid())
+  name         String
+  tin          String?
+  verifiedAt   DateTime?
+  ownerUserId  String?
+  users        User[]
+  bids         Bid[]
 }
-
 model Load {
   id                 String      @id @default(cuid())
   customerId         String
@@ -46,7 +47,6 @@ model Load {
   awardedBidId       String?
   awardedBid         Bid?        @relation(fields: [awardedBidId], references: [id])
 }
-
 model Bid {
   id                String   @id @default(cuid())
   loadId            String
@@ -61,6 +61,5 @@ model Bid {
   comment           String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-
   @@unique([loadId, carrierCompanyId])
 }

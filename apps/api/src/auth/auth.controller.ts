@@ -1,14 +1,16 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { JwtAuthGuard } from './jwt.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
-  @Post('register') register(@Body() dto: RegisterDto) {
-    if (!['customer','admin'].includes(dto.role)) throw new Error('Only customer/admin registration allowed');
-    return this.auth.register(dto);
-  }
-  @Post('login') login(@Body() dto: LoginDto) { return this.auth.login(dto); }
+  constructor(private auth: AuthService) {}
+
+  @Post('register') register(@Body() body: RegisterDto) { return this.auth.register(body); }
+  @Post('login')    login(@Body() body: LoginDto) { return this.auth.login(body); }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me') me(@Req() req: any) { return req.user; }
 }
