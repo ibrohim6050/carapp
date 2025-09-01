@@ -1,0 +1,66 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+
+enum Role { customer carrier admin }
+enum LoadStatus { draft open closed awarded cancelled }
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  passwordHash String?
+  role       Role
+  companyId  String?
+  company    Company? @relation(fields: [companyId], references: [id])
+  createdAt  DateTime @default(now())
+  loads      Load[]   @relation("CustomerLoads")
+  bids       Bid[]
+}
+
+model Company {
+  id          String  @id @default(cuid())
+  name        String
+  tin         String?
+  verifiedAt  DateTime?
+  ownerUserId String?
+  users       User[]
+  bids        Bid[]
+}
+
+model Load {
+  id                 String      @id @default(cuid())
+  customerId         String
+  customer           User        @relation("CustomerLoads", fields: [customerId], references: [id])
+  title              String
+  cargoType          String
+  weightTons         Float
+  pickupAddr         String
+  deliveryAddr       String
+  customsPoint       String
+  targetDate         DateTime
+  notes              String?
+  biddingDeadlineAt  DateTime
+  status             LoadStatus  @default(open)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  bids               Bid[]
+  awardedBidId       String?
+  awardedBid         Bid?        @relation(fields: [awardedBidId], references: [id])
+}
+
+model Bid {
+  id                String   @id @default(cuid())
+  loadId            String
+  load              Load     @relation(fields: [loadId], references: [id])
+  carrierCompanyId  String
+  carrierCompany    Company  @relation(fields: [carrierCompanyId], references: [id])
+  carrierUserId     String
+  carrierUser       User     @relation(fields: [carrierUserId], references: [id])
+  amountCurrency    String   @default("UZS")
+  amountValue       Float
+  etaDays           Int?
+  comment           String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([loadId, carrierCompanyId])
+}
